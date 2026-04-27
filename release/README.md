@@ -14,12 +14,16 @@
 
 ## Preparació
 
-1. opcionalment copia `.env.docker.example` a `.env.docker`
-2. si vols, ajusta `SERVER_NAME`
+Si es vol fer servir un fqdn i certificats, es pot copiar `.env.docker.example` a `.env.docker` i editar-lo.
+Es pot ajustar el SERVER-NAME  i els certificats.
+
+Si no es fa, el sistema generarà automàticament un certificat autosignat i la connexió es farà a la IP del sistema
+(https://IP:8499)
 
 ## Càrrega de la imatge
 
 ```bash
+Descarregar fortiACL.tar.gz (wget https://raw.githubusercontent.com/oriollorenzo/FortiACL/main/release/fortiACL.tar.gz)
 gzip -d fortiACL.tar.gz
 docker load -i fortiACL.tar
 ```
@@ -43,22 +47,15 @@ docker-compose --env-file .env.docker up -d --build
 ## Accés
 
 ```text
-https://<fqdn>:8499
+https://<fqdn>:8499 (si no hem definit SERVER_NAME, utilitzar la IP del sistema https://[IP]:8499
 ```
 
 ## Primera instal·lació
 
 - la web redirigeix a `/setup`
 - es crea el primer usuari local
-- un cop creat, `/setup` deixa d'estar disponible
-
-## Certificats i configuració
-
-- Si no existeixen certificats a `certs/`, Nginx generarà un certificat autofirmat automàticament.
-- Si no existeix `config/config.yaml`, l'aplicació el crearà automàticament amb una plantilla buida.
-- Després del primer accés, tota la configuració funcional es pot fer des de la web.
+- un cop creat, `/setup` deixa d'estar disponible, es només per la creacio del primer administrador
 
 ## Notes
 
-- Els logs es guarden a `logs/`.
 - No s'exposa cap port HTTP, només `8499` amb HTTPS.
