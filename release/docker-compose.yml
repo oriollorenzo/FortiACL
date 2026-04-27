@@ -1,7 +1,7 @@
 services:
   app:
-    image: forti-api:latest
-    container_name: forti-api-app
+    image: fortiacl:latest
+    container_name: forti-acl-app
     restart: unless-stopped
     environment:
       FORTI_API_CONFIG_PATH: /data/config/config.yaml
@@ -17,7 +17,7 @@ services:
   nginx:
     build:
       context: ./docker/nginx
-    container_name: forti-api-nginx
+    container_name: forti-acl-nginx
     restart: unless-stopped
     depends_on:
       - app
