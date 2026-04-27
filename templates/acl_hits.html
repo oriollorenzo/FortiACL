@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACL Hits | ACL Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    .table-scroll {
+        max-height: calc(100vh - 260px);
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+    .sticky-th {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background-color: #18181b !important;
+        border-bottom: 1px solid #27272a;
+    }
+</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans">
+    <main class="px-6 py-6">
+        <div class="flex justify-end pb-6 border-b border-zinc-900">
+            <form method="get" action="/acl-hits" class="flex flex-wrap items-center gap-3">
+                <input type="hidden" name="embedded" value="1">
+
+                <input type="text" name="q" value="{{ q or '' }}" placeholder="Cercar campus, switch, sèrie o ACL"
+                       class="bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 rounded-lg px-3 py-2 w-80">
+
+                <select name="campus" class="bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 rounded-lg px-3 py-2 w-40">
+                    <option value="">Tots els campus</option>
+                    {% for c in campus_options %}
+                        <option value="{{ c }}" {% if campus == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="severity" class="bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 rounded-lg px-3 py-2">
+                    <option value="">Totes les severitats</option>
+                    <option value="critical" {% if severity == 'critical' %}selected{% endif %}>critical</option>
+                    <option value="warning" {% if severity == 'warning' %}selected{% endif %}>warning</option>
+                    <option value="info" {% if severity == 'info' %}selected{% endif %}>info</option>
+                </select>
+
+                <select name="per_page" class="bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 rounded-lg px-3 py-2">
+                    <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                    <option value="200" {% if per_page == 200 %}selected{% endif %}>200</option>
+                </select>
+
+                <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-xs font-bold transition">
+                    Filtrar
+                </button>
+            </form>
+        </div>
+
+        <section class="mt-6 rounded-lg shadow-2xl border border-zinc-800">
+            <div class="bg-zinc-900 px-4 py-3 border-b border-zinc-800 rounded-t-lg flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-bold text-white">Mostres guardades</h3>
+                    <p class="text-xs text-zinc-400 mt-1">Total: {{ total }} registres</p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="clearFilteredSamples()"
+                            class="bg-red-700 hover:bg-red-600 px-3 py-2 rounded text-[11px] font-bold transition">
+                        Esborrar filtrat
+                    </button>
+
+                    <button type="button" onclick="clearAllSamples()"
+                            class="bg-red-900 hover:bg-red-800 px-3 py-2 rounded text-[11px] font-bold transition">
+                        Esborrar tot
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-scroll">
+                <table class="w-full text-left">
+                    <thead>
+    <tr class="text-zinc-300 text-[11px] font-bold uppercase tracking-wider">
+        <th class="sticky-th p-4">
+            <a href="/acl-hits?q={{ q or '' }}&campus={{ campus or '' }}&severity={{ severity or '' }}&per_page={{ per_page }}&page=1&embedded=1&sort_by=created_at&sort_dir={% if sort_by == 'created_at' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Data {% if sort_by == 'created_at' %}{{ '↑' if sort_dir == 'asc' else '↓' }}{% endif %}
+            </a>
+        </th>
+        <th class="sticky-th p-4">
+            <a href="/acl-hits?q={{ q or '' }}&campus={{ campus or '' }}&severity={{ severity or '' }}&per_page={{ per_page }}&page=1&embedded=1&sort_by=campus&sort_dir={% if sort_by == 'campus' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Campus {% if sort_by == 'campus' %}{{ '↑' if sort_dir == 'asc' else '↓' }}{% endif %}
+            </a>
+        </th>
+        <th class="sticky-th p-4">
+            <a href="/acl-hits?q={{ q or '' }}&campus={{ campus or '' }}&severity={{ severity or '' }}&per_page={{ per_page }}&page=1&embedded=1&sort_by=switch_name&sort_dir={% if sort_by == 'switch_name' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Switch {% if sort_by == 'switch_name' %}{{ '↑' if sort_dir == 'asc' else '↓' }}{% endif %}
+            </a>
+        </th>
+        <th class="sticky-th p-4">
+            <a href="/acl-hits?q={{ q or '' }}&campus={{ campus or '' }}&severity={{ severity or '' }}&per_page={{ per_page }}&page=1&embedded=1&sort_by=serial&sort_dir={% if sort_by == 'serial' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Sèrie {% if sort_by == 'serial' %}{{ '↑' if sort_dir == 'asc' else '↓' }}{% endif %}
+            </a>
+        </th>
+        <th class="sticky-th p-4">
+            <a href="/acl-hits?q={{ q or '' }}&campus={{ campus or '' }}&severity={{ severity or '' }}&per_page={{ per_page }}&page=1&embedded=1&sort_by=acl_name&sort_dir={% if sort_by == 'acl_name' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                ACL {% if sort_by == 'acl_name' %}{{ '↑' if sort_dir == 'asc' else '↓' }}{% endif %}
+            </a>
+        </th>
+        <th class="sticky-th p-4 text-center">
+            <a href="/acl-hits?q={{ q or '' }}&campus={{ campus or '' }}&severity={{ severity or '' }}&per_page={{ per_page }}&page=1&embedded=1&sort_by=counter_value&sort_dir={% if sort_by == 'counter_value' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Paquets {% if sort_by == 'counter_value' %}{{ '↑' if sort_dir == 'asc' else '↓' }}{% endif %}
+            </a>
+        </th>
+        <th class="sticky-th p-4 text-center">
+            <a href="/acl-hits?q={{ q or '' }}&campus={{ campus or '' }}&severity={{ severity or '' }}&per_page={{ per_page }}&page=1&embedded=1&sort_by=severity&sort_dir={% if sort_by == 'severity' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}">
+                Severitat {% if sort_by == 'severity' %}{{ '↑' if sort_dir == 'asc' else '↓' }}{% endif %}
+            </a>
+        </th>
+    </tr>
+</thead>
+                    <tbody class="divide-y divide-zinc-800 bg-zinc-900">
+                        {% if samples %}
+                            {% for s in samples %}
+                            <tr>
+                                <td class="p-4 text-xs font-mono text-zinc-300">{{ s.created_at }}</td>
+                                <td class="p-4 text-sm">{{ s.campus }}</td>
+                                <td class="p-4 text-sm">{{ s.switch_name or "-" }}</td>
+                                <td class="p-4 text-xs font-mono">{{ s.serial }}</td>
+                                <td class="p-4 text-sm">{{ s.acl_name }}</td>
+                                <td class="p-4 text-center font-bold">{{ s.counter_value }}</td>
+                                <td class="p-4 text-center">
+                                    {% if s.severity == "critical" %}
+                                        <span class="inline-flex px-2 py-1 rounded text-[11px] font-bold bg-red-900 text-red-200 border border-red-700">critical</span>
+                                    {% elif s.severity == "warning" %}
+                                        <span class="inline-flex px-2 py-1 rounded text-[11px] font-bold bg-yellow-900 text-yellow-200 border border-yellow-700">warning</span>
+                                    {% else %}
+                                        <span class="inline-flex px-2 py-1 rounded text-[11px] font-bold bg-zinc-800 text-zinc-200 border border-zinc-700">
+                                            {{ s.severity or "info" }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="p-8 text-center text-zinc-500 italic">
+                                    No hi ha mostres guardades.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex items-center justify-between px-4 py-4 border-t border-zinc-800 bg-zinc-900 rounded-b-lg text-sm text-zinc-300">
+                <div>Pàgina {{ page }} / {{ pages }}</div>
+
+                <div class="flex items-center gap-2">
+                    {% if page > 1 %}
+<a href="/acl-hits?q={{ q or '' }}&campus={{ campus or '' }}&severity={{ severity or '' }}&per_page={{ per_page }}&page={{ page - 1 }}&embedded=1&sort_by={{ sort_by }}&sort_dir={{ sort_dir }}"
+   class="px-3 py-1 rounded bg-zinc-950 border border-zinc-800 hover:bg-zinc-800">
+    Anterior
+</a>
+{% endif %}
+
+{% if page < pages %}
+<a href="/acl-hits?q={{ q or '' }}&campus={{ campus or '' }}&severity={{ severity or '' }}&per_page={{ per_page }}&page={{ page + 1 }}&embedded=1&sort_by={{ sort_by }}&sort_dir={{ sort_dir }}"
+   class="px-3 py-1 rounded bg-zinc-950 border border-zinc-800 hover:bg-zinc-800">
+    Següent
+</a>
+{% endif %}
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function buildCurrentFilters() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                q: params.get('q') || '',
+                campus: params.get('campus') || '',
+                severity: params.get('severity') || ''
+            };
+        }
+
+        async function clearAllSamples() {
+            if (!confirm('Segur que vols esborrar totes les mostres?')) return;
+
+            const res = await fetch('/acl-hits/samples/clear', {
+                method: 'POST',
+                credentials: 'same-origin'
+            });
+
+            if (res.ok) {
+                window.location.reload();
+            } else {
+                alert('Error esborrant totes les mostres');
+            }
+        }
+
+        async function clearFilteredSamples() {
+            const filters = buildCurrentFilters();
+
+            if (!filters.q && !filters.campus && !filters.severity) {
+                alert('No hi ha cap filtre actiu');
+                return;
+            }
+
+            if (!confirm('Segur que vols esborrar només les mostres filtrades actualment?')) return;
+
+            const params = new URLSearchParams(filters);
+
+            const res = await fetch(`/acl-hits/samples/clear-filtered?${params.toString()}`, {
+                method: 'POST',
+                credentials: 'same-origin'
+            });
+
+            if (res.ok) {
+                const current = new URL(window.location.href);
+                current.searchParams.set('page', '1');
+                window.location.href = current.toString();
+            } else {
+                alert('Error esborrant mostres filtrades');
+            }
+        }
+    </script>
+</body>
+</html>

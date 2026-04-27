@@ -1,0 +1,15 @@
+.env
+.env.*
+__pycache__/
+*.pyc
+node_modules/
+dist/
+build/
+*.log
+.vscode/
+venv/
+logs/
+app/core/config.secrets.yaml
+data/
+.env.docker
+

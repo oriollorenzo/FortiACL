@@ -1,0 +1,31 @@
+services:
+  app:
+    image: forti-api:latest
+    container_name: forti-api-app
+    restart: unless-stopped
+    environment:
+      FORTI_API_CONFIG_PATH: /data/config/config.yaml
+      FORTI_API_DB_PATH: /data/db/fortiswitch.db
+      FORTI_API_LOG_DIR: /data/logs
+    volumes:
+      - ./config:/data/config
+      - ./db:/data/db
+      - ./logs:/data/logs
+    expose:
+      - "8000"
+
+  nginx:
+    build:
+      context: ./docker/nginx
+    container_name: forti-api-nginx
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-localhost}
+      TLS_CERT_PATH: ${TLS_CERT_PATH:-/certs/fullchain.pem}
+      TLS_KEY_PATH: ${TLS_KEY_PATH:-/certs/privkey.pem}
+    ports:
+      - "8499:443"
+    volumes:
+      - ./certs:/certs

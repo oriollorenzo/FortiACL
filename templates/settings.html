@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuració | ACL Manager</title>
+    <link rel="icon" type="image/svg+xml"
+href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23EE3124'/%3E%3Cg fill='white'%3E%3Crect x='12' y='12' width='10' height='10' rx='1.5'/%3E%3Crect x='27' y='12' width='10' height='10' rx='1.5'/%3E%3Crect x='42' y='12' width='10' height='10' rx='1.5'/%3E%3Crect x='12' y='27' width='10' height='10' rx='1.5'/%3E%3Crect x='42' y='27' width='10' height='10' rx='1.5'/%3E%3Crect x='12' y='42' width='10' height='10' rx='1.5'/%3E%3Crect x='27' y='42' width='10' height='10' rx='1.5'/%3E%3Crect x='42' y='42' width='10' height='10' rx='1.5'/%3E%3C/g%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn.active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        input:focus, select:focus { outline: none; border-color: #3b82f6; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans">
+
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-zinc-950/80 z-[100] flex items-center justify-center">
+        <div class="text-center">
+            <i class="fas fa-circle-notch fa-spin text-5xl text-blue-500 mb-4"></i>
+            <p class="text-xl font-bold">Actualitzant configuració...</p>
+        </div>
+    </div>
+    {% if not embedded %}
+    <div class="flex">
+        <aside class="w-64 bg-zinc-900 min-h-screen shadow-xl border-r border-zinc-800 sticky top-0 h-screen">
+            <div class="p-6">
+                <h1 class="text-xl font-bold flex items-center text-blue-400 italic">
+                    <i class="fas fa-network-wired mr-3"></i> ACL Manager
+                </h1>
+            </div>
+            <nav class="mt-4">
+                <div class="px-6 mb-10">
+                    <a href="/" class="w-full flex items-center px-3 py-2 text-sm rounded-md text-zinc-400 hover:bg-zinc-800 transition">
+                        <i class="fas fa-arrow-left mr-3"></i> Tornar al Campus
+                    </a>
+                </div>
+            </nav>
+            <div class="absolute bottom-6 left-6 text-[10px] text-zinc-500 italic text-blue-400 font-bold">Oriol</div>
+        </aside>
+
+        <main class="flex-1 px-8 pb-8">
+            <div class="flex justify-between items-center h-[90px] border-b border-zinc-900">
+                <h2 class="text-xl font-bold text-white tracking-tight">Configuració del Sistema <span class="text-blue-500 text-xs font-mono ml-3">v{{ version }}</span></h2>
+                <div class="flex space-x-3">
+                    <button onclick="loadSettings()" class="text-zinc-400 hover:text-white text-xs font-bold px-4 transition"><i class="fas fa-undo mr-2"></i> Descartar</button>
+                    <button onclick="saveSettings()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded text-xs font-bold shadow-lg transition flex items-center"><i class="fas fa-save mr-2"></i> Desar Canvis</button>
+                </div>
+            </div>
+
+    {% else %}
+          <main class="px-6 py-6">
+    <div class="flex justify-end items-center pb-6 border-b border-zinc-900">
+        <div class="flex space-x-3">
+            <button onclick="loadSettings()" class="text-zinc-400 hover:text-white text-xs font-bold px-4 transition"><i class="fas fa-undo mr-2"></i> Descartar</button>
+            <button onclick="saveSettings()" class="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded text-xs font-bold shadow-lg transition flex items-center"><i class="fas fa-save mr-2"></i> Desar Canvis</button>
+        </div>
+    </div>
+    {% endif %}
+
+            <div class="flex space-x-8 border-b border-zinc-900 mt-6 mb-8">
+                <button onclick="switchTab('inventory')" class="tab-btn active pb-4 text-sm font-bold transition" id="btn-inventory">1. Inventari i Campus</button>
+                <button onclick="switchTab('policies')" class="tab-btn pb-4 text-sm font-bold transition" id="btn-policies">2. Polítiques ACL</button>
+                <button onclick="switchTab('security')" class="tab-btn pb-4 text-sm font-bold transition" id="btn-security">3. Seguretat</button>
+                <button onclick="switchTab('users')" class="tab-btn pb-4 text-sm font-bold transition" id="btn-users">4. Usuaris</button>
+            </div>
+
+            <div id="inventory" class="tab-content active space-y-8">
+                <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800 shadow-lg">
+                    <h3 class="text-blue-400 font-bold mb-4 flex items-center text-xs tracking-wider"><i class="fas fa-university mr-2"></i> Campus i FortiGates</h3>
+                    <div id="campus-container" class="space-y-3"></div>
+                    <button onclick="addCampus()" class="mt-4 text-[10px] text-blue-400 font-bold hover:text-blue-300 transition">+ AFEGIR CAMPUS</button>
+                </div>
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800 shadow-lg">
+                        <h3 class="text-red-400 font-bold mb-4 flex items-center text-xs tracking-wider"><i class="fas fa-shield-alt mr-2"></i> Equips Exclosos (CIDR)</h3>
+                        <div id="networks-container" class="space-y-2"></div>
+                        <button onclick="addNetwork()" class="mt-4 text-[10px] text-red-400 font-bold">+ Afegir Equip</button>
+                    </div>
+                    <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800 shadow-lg">
+                        <h3 class="text-yellow-500 font-bold mb-4 flex items-center text-xs tracking-wider"><i class="fas fa-microchip mr-2"></i> Models Exclosos</h3>
+                        <div id="models-container" class="space-y-2"></div>
+                        <button onclick="addModelVeto()" class="mt-4 text-[10px] text-yellow-500 font-bold">+ Afegir Model</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="policies" class="tab-content space-y-8">
+                <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800 shadow-lg">
+                    <h3 class="text-green-400 font-bold mb-4 uppercase text-xs tracking-wider">Custom Services</h3>
+                    <div id="services-container" class="space-y-3"></div>
+                    <button onclick="addService()" class="mt-4 text-[10px] text-green-400 font-bold hover:text-green-300 transition">+ AFEGIR SERVEI</button>
+                </div>
+                <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800 shadow-lg">
+                    <h3 class="text-purple-400 font-bold mb-4 uppercase text-xs tracking-wider">Regles ACL (Standard Prelookup)</h3>
+                    <div id="acls-container" class="space-y-4"></div>
+                    <button onclick="addACL()" class="mt-4 text-[10px] text-purple-400 font-bold hover:text-purple-300 transition">+ AFEGIR REGLA</button>
+                </div>
+            </div>
+
+            <div id="security" class="tab-content space-y-8">
+                <div class="bg-zinc-900 p-6 rounded-lg border border-zinc-800 max-w-3xl shadow-lg">
+                    <h3 class="text-blue-400 font-bold mb-6 italic">Gestió de Secrets</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] text-zinc-500 mb-2 font-bold uppercase tracking-widest">Usuari administrador FortiSwitch</label>
+                            <input type="text" id="sw_user" onchange="config.settings.switch_user=this.value" class="w-full bg-zinc-950 border border-zinc-800 rounded p-3 text-sm text-blue-300 font-mono focus:border-blue-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-zinc-500 mb-2 font-bold uppercase tracking-widest">Contrasenya Global Switches</label>
+                            <input type="password" id="sw_pass" onchange="config.settings.switch_password=this.value" class="w-full bg-zinc-950 border border-zinc-800 rounded p-3 text-sm text-blue-300 font-mono focus:border-blue-500 transition">
+                        </div>
+                        <div class="pt-6 border-t border-zinc-800">
+                            <label class="block text-[10px] text-zinc-500 mb-4 font-bold uppercase tracking-widest text-yellow-500">FortiGate API Tokens (per Campus)</label>
+                            <div id="api-keys-container" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="users" class="tab-content space-y-8">
+    <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-lg">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-blue-400 font-bold uppercase text-xs tracking-wider">Usuaris locals</h3>
+            <button onclick="loadUsers()" class="text-xs font-bold text-gray-300 hover:text-white">Refrescar</button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <input type="text" id="new-username" placeholder="Nou usuari"
+                   class="bg-gray-900 border border-gray-700 rounded p-3 text-sm text-gray-100">
+            <input type="password" id="new-password" placeholder="Contrasenya (mínim 8)"
+                   class="bg-gray-900 border border-gray-700 rounded p-3 text-sm text-gray-100">
+            <button onclick="createUser()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-xs font-bold">
+                Crear usuari
+            </button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-gray-900">
+                    <tr class="text-gray-300 text-[11px] font-bold uppercase tracking-wider">
+                        <th class="p-4">Usuari</th>
+                        <th class="p-4">Estat</th>
+                        <th class="p-4">Últim login</th>
+                        <th class="p-4">Accions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table" class="divide-y divide-gray-700 bg-gray-800"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+        </main>
+    </div>
+
+    <script>
+        let config = {};
+
+        function byId(id) {
+            return document.getElementById(id);
+        }
+
+        async function loadSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                config = await res.json();
+                renderAll();
+            } catch (e) { console.error("Error carregant:", e); }
+        }
+
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            byId(id).classList.add('active');
+            byId('btn-' + id).classList.add('active');
+        }
+
+        function renderAll() {
+            if (config.campus) {
+                byId('campus-container').innerHTML = config.campus.map((c, i) => `<div class="flex space-x-2"><input type="text" value="${c.name}" onchange="config.campus[${i}].name=this.value;renderSecurity()" class="bg-zinc-950 border border-zinc-800 rounded p-2 text-sm flex-1 font-bold text-gray-200"><input type="text" value="${c.fgt_ip}" onchange="config.campus[${i}].fgt_ip=this.value" class="bg-zinc-950 border border-zinc-800 rounded p-2 text-sm w-48 font-mono text-blue-400"><button onclick="config.campus.splice(${i},1);renderAll()" class="text-red-500 px-3"><i class="fas fa-trash-alt"></i></button></div>`).join('');
+            }
+            
+            if (config.restrictions) {
+                byId('networks-container').innerHTML = (config.restrictions.forbidden_networks || []).map((n, i) => `<div class="flex space-x-2"><input type="text" value="${n}" onchange="config.restrictions.forbidden_networks[${i}]=this.value" class="bg-zinc-950 border border-zinc-800 rounded p-2 text-xs flex-1 font-mono text-red-300"><button onclick="config.restrictions.forbidden_networks.splice(${i},1);renderAll()" class="text-red-500 px-2"><i class="fas fa-times"></i></button></div>`).join('');
+                byId('models-container').innerHTML = (config.restrictions.forbidden_models || []).map((m, i) => `<div class="flex space-x-2"><input type="text" value="${m}" onchange="config.restrictions.forbidden_models[${i}]=this.value" class="bg-zinc-950 border border-zinc-800 rounded p-2 text-xs flex-1 text-gray-200"><button onclick="config.restrictions.forbidden_models.splice(${i},1);renderAll()" class="text-red-500 px-2"><i class="fas fa-times"></i></button></div>`).join('');
+            }
+
+            const sCont = byId('services-container');
+            sCont.innerHTML = (config.custom_services || []).map((s, i) => {
+                let inputsHTML = '';
+                
+                if (s.protocol === 'TCP' || s.protocol === 'UDP') {
+                    const key = s.protocol === 'TCP' ? 'tcp-portrange' : 'udp-portrange';
+                    const val = s[key] || '';
+                    const [dst, src] = val.includes(':') ? val.split(':') : [val, ''];
+                    
+                    inputsHTML = `
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[9px] text-gray-600 font-bold uppercase">Destí:</span>
+                            <input type="text" value="${dst}" onchange="updatePort(${i}, '${key}', 'dst', this.value)" class="bg-zinc-950 border border-zinc-800 rounded p-2 text-xs w-28 font-mono text-zinc-300" placeholder="1-65535">
+                            <span class="text-[9px] text-gray-600 font-bold uppercase">Origen:</span>
+                            <input type="text" value="${src}" onchange="updatePort(${i}, '${key}', 'src', this.value)" class="bg-zinc-950 border border-zinc-800 rounded p-2 text-xs w-28 font-mono text-zinc-300" placeholder="1-65535">
+                        </div>`;
+                } else {
+                    const val = s['protocol-number'] || '';
+                    inputsHTML = `
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[9px] text-gray-600 font-bold uppercase">Núm. Protocol:</span>
+                            <input type="text" value="${val}" onchange="config.custom_services[${i}].protocol-number=parseInt(this.value)||0" class="bg-zinc-950 border border-zinc-800 rounded p-2 text-xs w-20 font-mono text-yellow-500">
+                        </div>`;
+                }
+
+                return `
+                <div class="bg-zinc-950/40 p-4 rounded border border-zinc-900 space-y-3 shadow-inner">
+                    <div class="flex items-center space-x-4">
+                        <input type="text" value="${s.name}" onchange="config.custom_services[${i}].name=this.value" class="bg-zinc-950 border border-zinc-800 rounded p-2 text-xs w-48 font-bold text-green-400">
+                        <select onchange="updateProto(${i}, this.value)" class="bg-zinc-900 border border-zinc-800 rounded p-2 text-xs text-zinc-400 font-bold">
+                            <option value="TCP" ${s.protocol==='TCP'?'selected':''}>TCP</option>
+                            <option value="UDP" ${s.protocol==='UDP'?'selected':''}>UDP</option>
+                            <option value="IP" ${s.protocol==='IP'?'selected':''}>IP (Raw)</option>
+                        </select>
+                        ${inputsHTML}
+                        <button onclick="config.custom_services.splice(${i},1);renderAll()" class="text-red-500 ml-auto p-2"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[9px] text-gray-600 font-bold">COMENTARI:</span>
+                        <input type="text" value="${s.comment || ''}" onchange="config.custom_services[${i}].comment=this.value" class="bg-zinc-950/50 border border-zinc-900 rounded p-2 text-[11px] flex-1 text-zinc-400" placeholder="Descripció...">
+                    </div>
+                </div>`;
+            }).join('');
+
+            const aclCont = byId('acls-container');
+            if (config.standard_acl_policy) {
+                aclCont.innerHTML = config.standard_acl_policy.map((a, i) => {
+                    const key = Object.keys(a.classifier || {})[0] || '';
+                    const val = a.classifier[key] || '';
+                    return `<div class="bg-zinc-950/50 p-5 rounded border-l-4 ${a.enabled !== false ? 'border-purple-600' : 'border-gray-600 opacity-60'} space-y-4">
+                        <div class="flex justify-between items-center">
+                             <div class="flex items-center space-x-3"><input type="checkbox" ${a.enabled !== false ? 'checked' : ''} onchange="config.standard_acl_policy[${i}].enabled = this.checked; renderAll()"><input type="text" value="${a.name}" onchange="config.standard_acl_policy[${i}].name=this.value" class="bg-transparent font-bold text-sm text-purple-300 border-b border-transparent focus:border-purple-400 focus:outline-none w-48 transition-colors"></div>
+                            <button onclick="config.standard_acl_policy.splice(${i},1);renderAll()" class="text-red-500"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <input type="text" value="${key}: ${val}" onchange="updateACLClassifier(${i}, this.value)" class="bg-zinc-900 border border-zinc-800 rounded p-2 text-xs font-mono text-yellow-500">
+                            <select onchange="config.standard_acl_policy[${i}].action.drop=this.value" class="bg-zinc-900 border border-zinc-800 rounded p-2 text-xs text-zinc-300">
+                                <option value="enable" ${a.action?.drop==='enable'?'selected':''}>DROP</option>
+                                <option value="disable" ${a.action?.drop==='disable'?'selected':''}>ALLOW</option>
+                            </select>
+                            <select onchange="config.standard_acl_policy[${i}].action.count=this.value" class="bg-zinc-900 border border-zinc-800 rounded p-2 text-xs text-zinc-300">
+                                <option value="enable" ${a.action?.count==='enable'?'selected':''}>COUNT ON</option>
+                                <option value="disable" ${a.action?.count==='disable'?'selected':''}>COUNT OFF</option>
+                            </select>
+                            <select
+  onchange="config.standard_acl_policy[${i}].severity=this.value"
+  class="bg-zinc-950 border border-zinc-800 rounded p-2 text-xs text-gray-200"
+>
+  <option value="critical" ${(a.severity || 'info') === 'critical' ? 'selected' : ''}>critical</option>
+  <option value="warning" ${(a.severity || 'info') === 'warning' ? 'selected' : ''}>warning</option>
+  <option value="info" ${(a.severity || 'info') === 'info' ? 'selected' : ''}>info</option>
+</select>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+            renderSecurity();
+        }
+
+        function updateProto(i, p) {
+            const s = config.custom_services[i];
+            delete s['tcp-portrange']; delete s['udp-portrange']; delete s['protocol-number'];
+            s.protocol = p;
+            if (p === 'IP') s['protocol-number'] = 0;
+            else if (p === 'TCP') s['tcp-portrange'] = "1-65000:1-65000";
+            else s['udp-portrange'] = "1-65000:1-65000";
+            renderAll();
+        }
+
+        function updatePort(index, key, field, value) {
+            const s = config.custom_services[index];
+            const current = s[key] || "1-65000:1-65000";
+            let [dst, src] = current.includes(':') ? current.split(':') : [current, ''];
+            
+            const netVal = value.trim() || "1-65000";
+            if (field === 'dst') dst = netVal;
+            else src = netVal;
+            
+            s[key] = src ? `${dst}:${src}` : dst;
+        }
+
+        function updateACLClassifier(index, raw) {
+            const i = raw.indexOf(':');
+            if (i !== -1) {
+                const key = raw.substring(0, i).trim();
+                const val = raw.substring(i + 1).trim();
+                config.standard_acl_policy[index].classifier = { [key]: val };
+            }
+        }
+
+        function renderSecurity() {
+            if (config.settings) {
+                byId('sw_user').value = config.settings.switch_user || '';
+                byId('sw_pass').value = config.settings.switch_password || '';
+            }
+            const apiCont = byId('api-keys-container');
+            if (config.campus) {
+                apiCont.innerHTML = config.campus.map(c => {
+                    const key = (config.api_keys || {})[c.name] || '';
+                    return `<div class="flex items-center space-x-4 bg-zinc-950/60 p-3 rounded border border-zinc-900"><span class="text-[11px] font-bold w-40 text-zinc-400 italic">${c.name}</span><input type="password" value="${key}" onchange="if(!config.api_keys)config.api_keys={};config.api_keys['${c.name}']=this.value" class="flex-1 bg-zinc-900 border border-zinc-800 rounded p-1.5 text-xs text-yellow-600 font-mono"></div>`;
+                }).join('');
+            }
+        }
+
+        async function saveSettings() {
+            byId('loading-overlay').classList.remove('hidden');
+            try {
+                const res = await fetch('/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(config) });
+                const data = await res.json();
+                if (res.ok) { alert("OK. Versió: " + data.version); window.location.reload(); }
+            } catch (e) { alert("Error"); } finally { byId('loading-overlay').classList.add('hidden'); }
+        }
+
+        function addCampus() { config.campus.push({name: "Nou_Campus", fgt_ip: "10.0.0.1"}); renderAll(); }
+        function addNetwork() { if(!config.restrictions.forbidden_networks) config.restrictions.forbidden_networks = []; config.restrictions.forbidden_networks.push("1.1.1.1/32"); renderAll(); }
+        function addModelVeto() { if(!config.restrictions.forbidden_models) config.restrictions.forbidden_models = []; config.restrictions.forbidden_models.push(""); renderAll(); }
+        function addService() { config.custom_services.push({name: "NOU_SERVEI", protocol: "TCP", "tcp-portrange": "1-65000:1-65000", comment: ""}); renderAll(); }
+        function addACL() { config.standard_acl_policy.push({name: "Nova Regla", classifier: {service: "IGMP"}, action: {drop: "enable", count: "enable"}, enabled: true}); renderAll(); }
+
+        loadSettings();
+    </script>
+     <script>
+async function loadUsers() {
+    const res = await fetch('/api/users');
+    if (!res.ok) {
+        alert('Error carregant usuaris');
+        return;
+    }
+
+    const data = await res.json();
+    const tbody = byId('users-table');
+
+    tbody.innerHTML = (data.items || []).map(u => `
+        <tr>
+            <td class="p-4 text-sm font-bold">${u.username}</td>
+            <td class="p-4 text-sm">
+                ${u.is_active ? '<span class="text-green-400 font-bold">actiu</span>' : '<span class="text-red-400 font-bold">inactiu</span>'}
+            </td>
+            <td class="p-4 text-xs font-mono text-gray-300">${u.last_login_at || '-'}</td>
+            <td class="p-4 text-sm">
+                <div class="flex items-center gap-2">
+                    <button onclick="changeUserPassword(${u.id}, '${u.username.replace(/'/g, "\\'")}')" class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-[11px] font-bold">
+                        Canviar password
+                    </button>
+                    <button onclick="toggleUserActive(${u.id})" class="${u.is_active ? 'bg-red-700 hover:bg-red-600' : 'bg-green-700 hover:bg-green-600'} px-3 py-2 rounded text-[11px] font-bold">
+                        ${u.is_active ? 'Desactivar' : 'Activar'}
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function createUser() {
+    const username = byId('new-username').value.trim();
+    const password = byId('new-password').value;
+
+    const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+        alert(data.detail || 'Error creant usuari');
+        return;
+    }
+
+    byId('new-username').value = '';
+    byId('new-password').value = '';
+    await loadUsers();
+}
+
+async function changeUserPassword(userId, username) {
+    const password = prompt(`Nova contrasenya per a ${username} (mínim 8 caràcters):`);
+    if (password === null) return;
+
+    const res = await fetch(`/api/users/${userId}/password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+        alert(data.detail || 'Error canviant contrasenya');
+        return;
+    }
+
+    alert('Contrasenya actualitzada');
+}
+
+async function toggleUserActive(userId) {
+    const res = await fetch(`/api/users/${userId}/toggle-active`, {
+        method: 'POST'
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+        alert(data.detail || 'Error canviant estat');
+        return;
+    }
+
+    await loadUsers();
+}
+
+const originalLoadSettings = loadSettings;
+loadSettings = async function() {
+    await originalLoadSettings();
+    await loadUsers();
+};
+</script>
+    {% if not embedded %}
+    </div>
+    {% endif %}
+</body>
+</html>

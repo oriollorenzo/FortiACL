@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs | ACL Manager</title>
+    <link rel="icon" type="image/svg+xml"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23EE3124'/%3E%3Cg fill='white'%3E%3Crect x='12' y='12' width='10' height='10' rx='1.5'/%3E%3Crect x='27' y='12' width='10' height='10' rx='1.5'/%3E%3Crect x='42' y='12' width='10' height='10' rx='1.5'/%3E%3Crect x='12' y='27' width='10' height='10' rx='1.5'/%3E%3Crect x='42' y='27' width='10' height='10' rx='1.5'/%3E%3Crect x='12' y='42' width='10' height='10' rx='1.5'/%3E%3Crect x='27' y='42' width='10' height='10' rx='1.5'/%3E%3Crect x='42' y='42' width='10' height='10' rx='1.5'/%3E%3C/g%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans">
+
+    {% if not embedded %}
+    <div class="flex">
+        <aside class="w-64 bg-zinc-900 min-h-screen shadow-xl border-r border-zinc-800 sticky top-0 h-screen">
+            <div class="p-6">
+                <h1 class="text-xl font-bold flex items-center text-blue-400 italic">
+                    <svg class="w-6 h-6 mr-3 shrink-0" viewBox="0 0 64 64" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="64" height="64" rx="10" fill="#EE3124"/>
+                        <g fill="white">
+                            <rect x="12" y="12" width="10" height="10" rx="1.5"/>
+                            <rect x="27" y="12" width="10" height="10" rx="1.5"/>
+                            <rect x="42" y="12" width="10" height="10" rx="1.5"/>
+                            <rect x="12" y="27" width="10" height="10" rx="1.5"/>
+                            <rect x="42" y="27" width="10" height="10" rx="1.5"/>
+                            <rect x="12" y="42" width="10" height="10" rx="1.5"/>
+                            <rect x="27" y="42" width="10" height="10" rx="1.5"/>
+                            <rect x="42" y="42" width="10" height="10" rx="1.5"/>
+                        </g>
+                    </svg>
+                    ACL Manager
+                </h1>
+            </div>
+
+            <nav class="mt-4 px-6">
+                <a href="/" class="w-full flex items-center px-3 py-2 text-sm rounded-md text-zinc-400 hover:bg-zinc-800 transition">
+                    Tornar al Campus
+                </a>
+                <a href="/settings" class="w-full flex items-center px-3 py-2 mt-2 text-sm rounded-md text-zinc-400 hover:bg-zinc-800 transition">
+                    Configuració
+                </a>
+                <a href="/logout" class="w-full flex items-center px-3 py-2 mt-2 text-sm rounded-md text-red-400 hover:bg-zinc-800 transition">
+                    Tancar Sessió
+                </a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 px-8 pb-8">
+            <div class="flex justify-between items-center h-[90px] border-b border-zinc-900">
+                <h2 class="text-xl font-bold text-white tracking-tight">Logs de l'aplicació</h2>
+
+                <form method="get" action="/logs" class="flex items-center gap-3">
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ query }}"
+                        placeholder="Filtrar text..."
+                        class="w-72 bg-zinc-900 border border-zinc-800 text-sm text-gray-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <select
+                        name="lines"
+                        class="bg-zinc-900 border border-zinc-800 text-sm text-gray-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        <option value="100" {% if lines == 100 %}selected{% endif %}>100</option>
+                        <option value="200" {% if lines == 200 %}selected{% endif %}>200</option>
+                        <option value="500" {% if lines == 500 %}selected{% endif %}>500</option>
+                        <option value="1000" {% if lines == 1000 %}selected{% endif %}>1000</option>
+                    </select>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-xs font-bold transition">
+                        Aplicar
+                    </button>
+                </form>
+            </div>
+    {% else %}
+            <main class="px-6 py-6">
+    <div class="flex justify-end pb-6 border-b border-zinc-900">
+        <form method="get" action="/logs" class="flex items-center gap-3">
+            <input type="hidden" name="embedded" value="1">
+
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                placeholder="Filtrar text..."
+                class="w-72 bg-zinc-900 border border-zinc-800 text-sm text-gray-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+            <select
+                name="lines"
+                class="bg-zinc-900 border border-zinc-800 text-sm text-gray-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                <option value="100" {% if lines == 100 %}selected{% endif %}>100</option>
+                <option value="200" {% if lines == 200 %}selected{% endif %}>200</option>
+                <option value="500" {% if lines == 500 %}selected{% endif %}>500</option>
+                <option value="1000" {% if lines == 1000 %}selected{% endif %}>1000</option>
+            </select>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-xs font-bold transition">
+                Aplicar
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+            <div class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl overflow-hidden">
+                <div class="px-4 py-3 border-b border-zinc-800 text-xs text-zinc-400">
+                    {% if entries %}
+                        Mostrant {{ entries|length }} línies
+                    {% else %}
+                        No hi ha línies per mostrar
+                    {% endif %}
+                </div>
+
+                <div class="{% if embedded %}max-h-[calc(100vh-180px)]{% else %}max-h-[calc(100vh-180px)]{% endif %} overflow-auto">
+                    <pre class="text-xs leading-5 text-gray-200 p-4 whitespace-pre-wrap break-words">{% for line in entries %}{{ line }}
+{% endfor %}</pre>
+                </div>
+            </div>
+        </main>
+
+    {% if not embedded %}
+    </div>
+    {% endif %}
+</body>
+</html>
