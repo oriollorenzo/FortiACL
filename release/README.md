@@ -20,7 +20,8 @@
 ## Càrrega de la imatge
 
 ```bash
-docker load -i forti-api-latest.tar
+gzip -d fortiACL.tar.gz
+docker load -i fortiACL.tar
 ```
 
 ## Arrencada
