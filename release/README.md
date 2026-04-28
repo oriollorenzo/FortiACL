@@ -24,11 +24,10 @@ Si no es fa, el sistema generarà automàticament un certificat autosignat i la 
 
 ```bash
 Descarregar fortiACL.tar.gz (wget https://raw.githubusercontent.com/oriollorenzo/FortiACL/main/release/fortiACL.tar.gz)
-gzip -d fortiACL.tar.gz
+tar -xzf fortiACL.tar.gz
 docker load -i fortiACL.tar
 ```
-
-## Arrencada
+## Engegada
 
 Amb `docker-compose` clàssic:
 
