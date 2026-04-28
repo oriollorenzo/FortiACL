@@ -23,21 +23,19 @@ Si no es fa, el sistema generarà automàticament un certificat autosignat i la 
 ## Càrrega de la imatge
 
 ```bash
-Descarregar fortiACL.tar.gz (wget https://raw.githubusercontent.com/oriollorenzo/FortiACL/main/release/fortiACL.tar.gz)
+apt update
+apt install docker.io docker-compose wget
+mkdir /opt/fortiACL
+cd /opt/fortiACL
+wget https://raw.githubusercontent.com/oriollorenzo/FortiACL/main/release/fortiACL.tar.gz
 tar -xzf fortiACL.tar.gz
 docker load -i fortiACL.tar
-```
-## Engegada
 
-Amb `docker-compose` clàssic:
+Si volem fer servir https://[IP]:8499
 
-Sense `.env.docker`:
-
-```bash
 docker-compose up -d --build
 ```
-
-Amb `.env.docker`:
+Si volem fer servir certificats propis i fqdn, cal configurar .env.docker (hi ha un .env.docker.example amb un exemple)
 
 ```bash
 docker-compose --env-file .env.docker up -d --build
