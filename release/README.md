@@ -59,3 +59,4 @@ https://<fqdn>:8499 (si no hem definit SERVER_NAME, utilitzar la IP del sistema 
 ## Notes
 
 - No s'exposa cap port HTTP, només `8499` amb HTTPS.
+
